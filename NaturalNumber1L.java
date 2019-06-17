@@ -46,6 +46,17 @@ public class NaturalNumber1L extends NaturalNumberSecondary {
         return this.val.equals("0");
     }
 
+    @Override
+    public int getLastDigit() {
+        return Integer.parseInt(
+                this.val.substring(this.val.length() - 1, this.val.length()));
+    }
+
+    @Override
+    public int getNumDigits() {
+        return this.val.length();
+    }
+
     // val must not be over Integer.MAX_VALUE
     @Override
     public int getVal() {

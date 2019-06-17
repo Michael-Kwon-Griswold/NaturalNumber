@@ -32,6 +32,10 @@ public interface NaturalNumber extends NaturalNumberKernel {
 
     int toInt();
 
+    int getLastDigit();
+
+    int getNumDigits();
+
     void print();
 
 }

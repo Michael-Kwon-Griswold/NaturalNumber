@@ -4,18 +4,57 @@ import components.stack.Stack1L;
 public abstract class NaturalNumberSecondary implements NaturalNumber {
     // bugs, no carryover
 
-    // 1234     34
-    // 340
-    // 123434
+    // Case 1: nNumDigits = 1, lastAdded < 10
+    // 1234     3
+
+    // Case 2: nNumDigits = 1, lastAdded > 10
+    // 1234   9
+    // 1234 9
+
+    // Case 3: nNumDigits = 3, lastAdded < 10
+    // 1234 234
+
+    // Case 4: nNumDigits = 3, lastAdded > 10
+    // 1234 239
+
+    // separate into all digits
+    // 1000 200 30 4,   10 2
+    // for the length of the smaller of the two:
+    // add last 2 digits
+    // 1000 200 30 4, 10 2: 6
+
+    // add next 2 digits
+    // 1000 200 30 4, 10 2: 40
+    // add to last case : 46
+
+    // add to remaining digits of longer:
+    // 1246
+
+    // separate into all digits
+    // 1000 200 90 9,   20 2
+    // for the length of the smaller of the two:
+    // add last 2 digits
+    // 1000 200 90 9, 20 2: 11
+
+    // add next 2 digits
+    // 1000 200 90  9, 10 2:
+    // add to last case : 46
+
+    // add to remaining digits of longer:
+    // 1246
+
+    // if > 10
+
     @Override
     public void add(NaturalNumber n) {
-        n.multiplyBy10(0);
-        this.multiplyBy10(n.toInt());
-        this.divideBy10();
+        this.copyFrom(new NaturalNumber1L(this.getVal() + n.getVal()));
     }
 
     @Override
     public boolean canConvertToInt() {
+        if (this.isZero()) {
+            return true;
+        }
         Stack<Integer> nn = new Stack1L<Integer>();
         Stack<Integer> copy = new Stack1L<Integer>();
         int firstLastDigit = this.divideBy10();
@@ -96,8 +135,7 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
     // TODO works for carryover?
     @Override
     public void decrement() {
-        int lastDigit = this.divideBy10();
-        this.multiplyBy10(lastDigit - 1);
+        this.copyFrom(new NaturalNumber1L(this.getVal() - 1));
     }
 
     @Override
@@ -115,8 +153,7 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
     //TODO works for carryover?
     @Override
     public void increment() {
-        int lastDigit = this.divideBy10();
-        this.multiplyBy10(lastDigit + 1);
+        this.copyFrom(new NaturalNumber1L(this.getVal() + 1));
     }
 
     @Override
@@ -163,6 +200,8 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
         this.copyFrom(new NaturalNumber1L(i));
     }
 
+    // has recursive bug
+
     @Override
     public void setFromInt(int i) {
         int tens = i / 10;
@@ -191,6 +230,7 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
 
     @Override
     public void subtract(NaturalNumber n) {
+        this.copyFrom(new NaturalNumber1L(this.getVal() - n.getVal()));
     }
 
     @Override
