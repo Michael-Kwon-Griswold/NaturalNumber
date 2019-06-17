@@ -2,52 +2,101 @@ import components.stack.Stack;
 import components.stack.Stack1L;
 
 public abstract class NaturalNumberSecondary implements NaturalNumber {
-    // bugs, no carryover
 
-    // Case 1: nNumDigits = 1, lastAdded < 10
-    // 1234     3
+    @Override
+    public int compareNN(NaturalNumber n1, NaturalNumber n2) {
+        String sN1 = n1.getString();
+        String sN2 = n2.getString();
 
-    // Case 2: nNumDigits = 1, lastAdded > 10
-    // 1234   9
-    // 1234 9
-
-    // Case 3: nNumDigits = 3, lastAdded < 10
-    // 1234 234
-
-    // Case 4: nNumDigits = 3, lastAdded > 10
-    // 1234 239
-
-    // separate into all digits
-    // 1000 200 30 4,   10 2
-    // for the length of the smaller of the two:
-    // add last 2 digits
-    // 1000 200 30 4, 10 2: 6
-
-    // add next 2 digits
-    // 1000 200 30 4, 10 2: 40
-    // add to last case : 46
-
-    // add to remaining digits of longer:
-    // 1246
-
-    // separate into all digits
-    // 1000 200 90 9,   20 2
-    // for the length of the smaller of the two:
-    // add last 2 digits
-    // 1000 200 90 9, 20 2: 11
-
-    // add next 2 digits
-    // 1000 200 90  9, 10 2:
-    // add to last case : 46
-
-    // add to remaining digits of longer:
-    // 1246
-
-    // if > 10
+        if (sN1.length() > sN2.length()) {
+            return 1;
+        } else if (sN2.length() > sN1.length()) {
+            return -1;
+        } else { // strings are same length
+            for (int i = 0; i < sN1.length(); i++) {
+                int compN1 = Integer
+                        .parseInt(Character.toString(sN1.charAt(i))); // num_i of n1
+                int compN2 = Integer
+                        .parseInt(Character.toString(sN2.charAt(i))); // num_i of n2
+                if (compN1 > compN2) {
+                    return 1;
+                } else if (compN2 > compN1) {
+                    return -1;
+                }
+            }
+        }
+        return 0; // strings are exactly the same
+    }
 
     @Override
     public void add(NaturalNumber n) {
-        this.copyFrom(new NaturalNumber1L(this.getVal() + n.getVal()));
+        int comp = this.compareNN(this, n);
+        int numDigitsOfLarger;
+        String sum = "";
+
+        if (comp >= 0) {
+            numDigitsOfLarger = this.getNumDigits();
+        } else {
+            numDigitsOfLarger = n.getNumDigits();
+        }
+        int carry = 0;
+
+        NaturalNumber thisCopy = new NaturalNumber2();
+        thisCopy.copyFrom(this);
+
+        NaturalNumber nCopy = new NaturalNumber2();
+        nCopy.copyFrom(n);
+
+        boolean cont = true;
+        int i = 0;
+
+        while (cont) {
+            int thisLast;
+            int nLast;
+            int larger;
+            int smaller;
+
+            if (thisCopy.getNumDigits() >= 1) {
+                thisLast = thisCopy.divideBy10();
+            } else {
+                thisLast = 0;
+            }
+            if (nCopy.getNumDigits() >= 1) {
+                nLast = nCopy.divideBy10();
+            } else {
+                nLast = 0;
+            }
+
+            if (thisLast > nLast) {
+                larger = thisLast;
+                smaller = nLast;
+            } else {
+                larger = nLast;
+                smaller = thisLast;
+            }
+
+            if (carry == 1) {
+                larger++;
+            }
+            carry = 0;
+
+            while (true) {
+                if (larger >= 10) {
+                    sum = sum + sum.valueOf(smaller);
+                    carry = 1;
+                    break;
+                } else if (smaller == 0) {
+                    sum = sum.valueOf(larger) + sum;
+                    break;
+                }
+                larger++;
+                smaller--;
+            }
+            i++;
+            cont = (i < numDigitsOfLarger) || (carry == 1);
+        }
+
+        this.copyFrom(new NaturalNumber2(sum));
     }
 
     @Override

@@ -1,5 +1,7 @@
 
 public interface NaturalNumber extends NaturalNumberKernel {
+    int compareNN(NaturalNumber n1, NaturalNumber n2);
+
     int getVal();
 
     String getString();
