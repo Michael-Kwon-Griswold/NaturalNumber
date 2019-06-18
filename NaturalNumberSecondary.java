@@ -56,36 +56,26 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
         while (cont) {
             int thisLast;
             int nLast;
-            int larger;
-            int smaller;
 
             thisLast = thisCopy.divideBy10();
             nLast = nCopy.divideBy10();
 
-            if (thisLast > nLast) {
-                larger = thisLast;
-                smaller = nLast;
-            } else {
-                larger = nLast;
-                smaller = thisLast;
-            }
-
             if (carry == 1) {
-                larger++;
+                thisLast++;
             }
             carry = 0;
 
             while (true) {
-                if (larger == 10) {
-                    sum = String.valueOf(smaller) + sum;
+                int smallSum = thisLast + nLast;
+
+                if (smallSum >= 10) {
+                    sum = String.valueOf(smallSum % 10) + sum;
                     carry = 1;
                     break;
-                } else if (smaller == 0) {
-                    sum = String.valueOf(larger) + sum;
+                } else {
+                    sum = String.valueOf(smallSum) + sum;
                     break;
                 }
-                larger++;
-                smaller--;
             }
             i++;
             cont = (i < numDigitsOfLarger) || (carry == 1);
@@ -189,10 +179,9 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
         }
     }
 
-    // TODO works for carryover?
     @Override
     public void decrement() {
-        this.copyFrom(new NaturalNumber1L(this.getVal() - 1));
+        this.subtract(new NaturalNumber2(1));
     }
 
     @Override
@@ -207,10 +196,9 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
         return new NaturalNumber1L(remainder);
     }
 
-    //TODO works for carryover?
     @Override
     public void increment() {
-        this.copyFrom(new NaturalNumber1L(this.getVal() + 1));
+        this.add(new NaturalNumber2(1));
     }
 
     @Override
@@ -251,9 +239,6 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
         this.copyFrom(new NaturalNumber1L(i));
     }
 
-    //The simple ones
-    // The great few
-
     @Override
     public void setFromInt(int i) {
         this.setFromString(String.valueOf(i));
@@ -266,7 +251,58 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
 
     @Override
     public void subtract(NaturalNumber n) {
-        this.copyFrom(new NaturalNumber1L(this.getVal() - n.getVal()));
+        //get num digits of bigger number
+        int comp = this.compareNN(this, n);
+        int numDigitsOfLarger;
+        String diff = "";
+
+        if (comp >= 0) {
+            numDigitsOfLarger = this.getNumDigits();
+        } else {
+            numDigitsOfLarger = n.getNumDigits();
+        }
+        int owed = 0;
+
+        // make copies to destroy
+        NaturalNumber thisCopy = new NaturalNumber2();
+        thisCopy.copyFrom(this);
+
+        NaturalNumber nCopy = new NaturalNumber2();
+        nCopy.copyFrom(n);
+
+        //loop counters, conditions
+        boolean cont = true;
+        int i = 0;
+
+        while (cont) {
+            int thisLast;
+            int nLast;
+
+            thisLast = thisCopy.divideBy10();
+            nLast = nCopy.divideBy10();
+
+            if (owed == 1) {
+                thisLast--;
+            }
+            owed = 0;
+
+            while (true) {
+                int smallDiff = thisLast - nLast;
+
+                if (smallDiff < 0) {
+                    diff = String.valueOf(10 + smallDiff) + diff;
+                    owed = 1;
+                    break;
+                } else {
+                    diff = String.valueOf(smallDiff) + diff;
+                    break;
+                }
+            }
+            i++;
+            cont = (i < numDigitsOfLarger) || (owed == 1);
+        }
+
+        this.copyFrom(new NaturalNumber2(diff));
     }
 
     @Override
