@@ -2,52 +2,96 @@ import components.stack.Stack;
 import components.stack.Stack1L;
 
 public abstract class NaturalNumberSecondary implements NaturalNumber {
-    // bugs, no carryover
 
-    // Case 1: nNumDigits = 1, lastAdded < 10
-    // 1234     3
+    @Override
+    public int compareNN(NaturalNumber n1, NaturalNumber n2) {
+        String sN1 = n1.getString();
+        String sN2 = n2.getString();
 
-    // Case 2: nNumDigits = 1, lastAdded > 10
-    // 1234   9
-    // 1234 9
-
-    // Case 3: nNumDigits = 3, lastAdded < 10
-    // 1234 234
-
-    // Case 4: nNumDigits = 3, lastAdded > 10
-    // 1234 239
-
-    // separate into all digits
-    // 1000 200 30 4,   10 2
-    // for the length of the smaller of the two:
-    // add last 2 digits
-    // 1000 200 30 4, 10 2: 6
-
-    // add next 2 digits
-    // 1000 200 30 4, 10 2: 40
-    // add to last case : 46
-
-    // add to remaining digits of longer:
-    // 1246
-
-    // separate into all digits
-    // 1000 200 90 9,   20 2
-    // for the length of the smaller of the two:
-    // add last 2 digits
-    // 1000 200 90 9, 20 2: 11
-
-    // add next 2 digits
-    // 1000 200 90  9, 10 2:
-    // add to last case : 46
-
-    // add to remaining digits of longer:
-    // 1246
-
-    // if > 10
+        if (sN1.length() > sN2.length()) {
+            return 1;
+        } else if (sN2.length() > sN1.length()) {
+            return -1;
+        } else { // strings are same length
+            for (int i = 0; i < sN1.length(); i++) {
+                int compN1 = Integer
+                        .parseInt(Character.toString(sN1.charAt(i))); // num_i of n1
+                int compN2 = Integer
+                        .parseInt(Character.toString(sN2.charAt(i))); // num_i of n2
+                if (compN1 > compN2) {
+                    return 1;
+                } else if (compN2 > compN1) {
+                    return -1;
+                }
+            }
+        }
+        return 0; // strings are exactly the same
+    }
 
     @Override
     public void add(NaturalNumber n) {
-        this.copyFrom(new NaturalNumber1L(this.getVal() + n.getVal()));
+        //get num digits of bigger number
+        int comp = this.compareNN(this, n);
+        int numDigitsOfLarger;
+        String sum = "";
+
+        if (comp >= 0) {
+            numDigitsOfLarger = this.getNumDigits();
+        } else {
+            numDigitsOfLarger = n.getNumDigits();
+        }
+        int carry = 0;
+
+        // make copies to destroy
+        NaturalNumber thisCopy = new NaturalNumber2();
+        thisCopy.copyFrom(this);
+
+        NaturalNumber nCopy = new NaturalNumber2();
+        nCopy.copyFrom(n);
+
+        //loop counters, conditions
+        boolean cont = true;
+        int i = 0;
+
+        while (cont) {
+            int thisLast;
+            int nLast;
+            int larger;
+            int smaller;
+
+            thisLast = thisCopy.divideBy10();
+            nLast = nCopy.divideBy10();
+
+            if (thisLast > nLast) {
+                larger = thisLast;
+                smaller = nLast;
+            } else {
+                larger = nLast;
+                smaller = thisLast;
+            }
+
+            if (carry == 1) {
+                larger++;
+            }
+            carry = 0;
+
+            while (true) {
+                if (larger == 10) {
+                    sum = String.valueOf(smaller) + sum;
+                    carry = 1;
+                    break;
+                } else if (smaller == 0) {
+                    sum = String.valueOf(larger) + sum;
+                    break;
+                }
+                larger++;
+                smaller--;
+            }
+            i++;
+            cont = (i < numDigitsOfLarger) || (carry == 1);
+        }
+
+        this.copyFrom(new NaturalNumber2(sum));
     }
 
     @Override
@@ -104,31 +148,44 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
 
     @Override
     public void copyFrom(NaturalNumber n) {
+
         NaturalNumber reverseRestore = new NaturalNumber1L();
         NaturalNumber reverseCopy = new NaturalNumber1L();
+        String restore = n.getString();
 
         //destroy this
-        while (!this.isZero()) {
-            this.divideBy10();
-        }
+        this.clear();
 
         // copy n
         while (!n.isZero()) {
             int lastDigit = n.divideBy10();
-            reverseRestore.multiplyBy10(lastDigit);
-            reverseCopy.multiplyBy10(lastDigit);
+            if (lastDigit == 0) {
+                reverseRestore.concatZero();
+                reverseCopy.concatZero();
+            } else {
+                reverseRestore.multiplyBy10(lastDigit);
+                reverseCopy.multiplyBy10(lastDigit);
+            }
         }
 
         //use
         while (!reverseCopy.isZero()) {
             int lastDigit = reverseCopy.divideBy10();
-            this.multiplyBy10(lastDigit);
+            if (lastDigit == 0) {
+                this.concatZero();
+            } else {
+                this.multiplyBy10(lastDigit);
+            }
         }
 
         // restore n
         while (!reverseRestore.isZero()) {
             int lastDigit = reverseRestore.divideBy10();
-            n.multiplyBy10(lastDigit);
+            if (lastDigit == 0) {
+                n.concatZero();
+            } else {
+                n.multiplyBy10(lastDigit);
+            }
         }
     }
 
@@ -175,14 +232,8 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
         }
     }
 
-    // this = 9
-    // root = 2
-
     @Override
     public void root(int r) {
-        // approximate roots using incrementing loop, to inf?
-        // case: exact match - return value
-        // otherwise: last one must be lower. This one must be higher. Choose last one
         int i = 0;
         int lastGuess = 0;
         int thisGuess = 0;
@@ -200,33 +251,18 @@ public abstract class NaturalNumberSecondary implements NaturalNumber {
         this.copyFrom(new NaturalNumber1L(i));
     }
 
-    // has recursive bug
+    //The simple ones
+    // The great few
 
     @Override
     public void setFromInt(int i) {
-        int tens = i / 10;
-        int remainder = i % 10;
-
-        while (!this.isZero()) {
-            this.divideBy10();
-        }
-
-        if (tens != 0) {
-            this.multiplyBy10(1); // this val = 1
-            this.setFromInt(tens);
-        }
-        this.multiplyBy10(remainder);
+        this.setFromString(String.valueOf(i));
     }
 
     @Override
     public void setFromString(String s) {
-        // construct nn
-        NaturalNumber set = new NaturalNumber1L(s);
-        this.copyFrom(set);
+        this.copyFrom(new NaturalNumber1L(s));
     }
-
-    // 1242352
-    // 124235 2
 
     @Override
     public void subtract(NaturalNumber n) {

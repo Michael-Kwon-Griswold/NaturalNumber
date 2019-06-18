@@ -1,8 +1,9 @@
 import components.stack.Stack;
 import components.stack.Stack1L;
 
-public class NaturalNumber2 extends NaturalNumberSecondary {
-    Stack<Integer> num;
+public class NaturalNumber2 extends NaturalNumberSecondary
+        implements Cloneable {
+    private Stack<Integer> num;
 
     public NaturalNumber2() {
         this.num = new Stack1L<Integer>();
@@ -27,6 +28,10 @@ public class NaturalNumber2 extends NaturalNumberSecondary {
             String last = Character.toString(s.charAt(i));
             this.num.push(Integer.parseInt(last));
         }
+    }
+
+    public NaturalNumber2(Stack<Integer> s) {
+        this.num = s;
     }
 
     @Override
@@ -121,6 +126,14 @@ public class NaturalNumber2 extends NaturalNumberSecondary {
     public void transferFrom(Object source) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void concatZero() {
+        if (this.isZero()) {
+            this.num.push(0);
+        }
+        this.num.push(0);
     }
 
 }
