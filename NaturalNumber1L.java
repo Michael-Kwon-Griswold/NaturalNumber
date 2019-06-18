@@ -1,5 +1,6 @@
 
-public class NaturalNumber1L extends NaturalNumberSecondary {
+public class NaturalNumber1L extends NaturalNumberSecondary
+        implements Cloneable {
     private String val;
 
     public NaturalNumber1L() {
@@ -89,6 +90,21 @@ public class NaturalNumber1L extends NaturalNumberSecondary {
     public void transferFrom(Object source) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void concatZero() {
+        this.val = this.val + "0";
+
+    }
+
+    @Override
+    public NaturalNumber clone() {
+        try {
+            return (NaturalNumber) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException();
+        }
     }
 
 }
